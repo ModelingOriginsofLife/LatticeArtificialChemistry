@@ -109,7 +109,7 @@ IMPLEMENT_APP(MyApp)
 bool MyApp::OnInit()
 {
     MyFrame *frame = new MyFrame( _("lattice_shape"), wxDefaultPosition,
-                                  wxSize(300,200) );
+                                  wxSize(800,600) );
     frame->Show(true);
     SetTopWindow(frame);
     return true;
@@ -147,7 +147,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     its_per_second = 0.0F;
     save_video = false;
 
-    world.init(30,30);
+    world.init(60,60);
 }
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))

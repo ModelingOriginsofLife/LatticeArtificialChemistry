@@ -35,7 +35,7 @@ void World_wx::Draw(wxGraphicsContext *pGC,float scale)
         if(a->state==0)
         {
             // make the color somewhat transparent
-            color.Set(color.Red(),color.Green(),color.Blue(),20);
+            color.Set(color.Red(),color.Green(),color.Blue(),160);
         }
         pGC->SetBrush(wxBrush(color));
         pGC->SetPen(wxPen(color));

@@ -28,8 +28,8 @@ void World::init(int x,int y)
     this->iterations = 0;
     
     // add some atoms
-    const int num_copies = 1;
-    const int n=19 * num_copies;
+    const int num_copies = 5;
+    const int n=19 * num_copies + 100;
     this->atoms = vector<Atom>(n);
     int i=0;
     string s = "accaccccaaccacacaac";
@@ -305,8 +305,12 @@ bool World::canMoveBlock(int sx,int sy,int ex,int ey,int dx,int dy) const
             }
         }
     }
-    if(energy_after > energy_before && rand()%100) // energy has increased: reject this move (most of the time)
+    
+    const bool consider_electrostatic_energy = false;
+    
+    if(consider_electrostatic_energy && energy_after > energy_before && rand()%100) // energy has increased: reject this move (most of the time)
         return false;
+        
     return true;
 }
 
