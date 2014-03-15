@@ -128,7 +128,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         wxMenu *actions_menu = new wxMenu;
         actions_menu->Append( ID::Run, _("&Run\tF5") );
         actions_menu->AppendCheckItem( ID::ReallyFast, _("Really &fast\tF7") );
-        actions_menu->Append( ID::Stop, _("&Stop\tF6") );
+        actions_menu->Append( ID::Stop, _("&Stop\tF5") );
         menuBar->Append( actions_menu, _("&Actions") );
     }
     {

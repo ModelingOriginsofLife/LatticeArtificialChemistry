@@ -35,9 +35,10 @@ class World
         bool canMoveBlock(int sx,int sy,int ex,int ey,int dx,int dy) const;
         void moveBlock(int sx,int sy,int ex,int ey,int dx,int dy);
         
-        //void moveSomeAtoms();
+        void moveSomeIndividualAtoms();
+        void moveSomeBondedAtoms();
         
-        void moveAtoms(const std::vector<Atom*>& movers,int dx,int dy);
+        void moveTheseAtoms(const std::vector<Atom*>& movers,int dx,int dy);
         
     protected:
     

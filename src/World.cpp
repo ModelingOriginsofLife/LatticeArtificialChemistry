@@ -28,16 +28,16 @@ void World::init(int x,int y)
     this->iterations = 0;
     
     // add some atoms
-    const int num_copies = 5;
-    const int n=19 * num_copies + 100;
+    const int num_copies = 1;
+    const int n=19 * num_copies + 300;
     this->atoms = vector<Atom>(n);
     int i=0;
-    string s = "accaccccaaccacacaac";
+    string s = "eabbcdaf";
     for(int iCopy=0;iCopy<num_copies;iCopy++)
     {
         for(int j=0;j<s.length();j++)
         {
-            initAtom(i,1+j,10+iCopy*10,s[j],1);
+            initAtom(i,1+j,10+iCopy*10,s[j],(j==0)?8:1);
             if(j>0)
                 this->atoms[i].bondWith(&this->atoms[i-1]);
             if(false && iCopy>0)
@@ -59,7 +59,7 @@ void World::init(int x,int y)
     
     // add some reactions:
     
-    /* // classic 2002 set (requires newly bonded atoms to jump over) (causes tangling)
+    // classic 2002 set (requires newly bonded atoms to jump over) (causes tangling)
     this->reactions.push_back(Reaction('e',8,false,'e',0,4,true,3));
     this->reactions.push_back(Reaction('x',4,true,'y',1,2,true,5));
     this->reactions.push_back(Reaction('x',5,false,'x',0,7,true,6));
@@ -67,10 +67,10 @@ void World::init(int x,int y)
     this->reactions.push_back(Reaction('x',7,true,'y',3,4,true,3));
     this->reactions.push_back(Reaction('f',4,true,'f',3,8,false,8));
     this->reactions.push_back(Reaction('x',2,true,'y',8,9,true,1));
-    this->reactions.push_back(Reaction('x',9,true,'y',9,8,false,8));*/
+    this->reactions.push_back(Reaction('x',9,true,'y',9,8,false,8));
     
-    /* // adapted from 2007 set (allows bonding either side) (causes tangling)
-    this->reactions.push_back(Reaction('e',8,false,'e',0,2,true,3));
+    // adapted from 2007 set (allows bonding either side) (causes tangling)
+    /*this->reactions.push_back(Reaction('e',8,false,'e',0,2,true,3));
     this->reactions.push_back(Reaction('x',2,true,'y',1,7,true,4));
     this->reactions.push_back(Reaction('x',4,false,'y',3,5,true,7));
     this->reactions.push_back(Reaction('x',5,false,'x',0,6,true,6));
@@ -155,11 +155,28 @@ void World::setAt(int x,int y,Atom* a)
 void World::doTimeStep()
 {
     // do the physics (movement, no reactions)
-    //this->moveSomeAtoms();
-    const int BLOCK_MOVES_PER_REACTION_CHECK = 10; // (should be proportional to size somehow?)
-    // (no point re-checking for reactions if many atoms haven't moved)
-    for(int i=0;i<BLOCK_MOVES_PER_REACTION_CHECK;i++)
-        this->moveABlock();
+
+    const bool do_individual_movement   = true;
+    const bool do_bonded_atoms_movement = false;
+    const bool do_mpeg_block_movement   = false;
+    
+    if( do_individual_movement )
+    {
+        this->moveSomeIndividualAtoms();
+    }
+    
+    if( do_bonded_atoms_movement )
+    {
+        this->moveSomeBondedAtoms();
+    }
+    
+    if( do_mpeg_block_movement )
+    {
+        const int BLOCK_MOVES_PER_REACTION_CHECK = 10; // (should be proportional to size somehow?)
+        // (no point re-checking for reactions if many atoms haven't moved)
+        for(int i=0;i<BLOCK_MOVES_PER_REACTION_CHECK;i++)
+            this->moveABlock();
+    }
         
     // do the chemistry (reactions, no movement)
     this->doReactions();
@@ -234,7 +251,17 @@ void World::moveABlock()
 
 bool bondTooLong(int x1,int y1,int x2,int y2)
 {
-    return abs(x2-x1)>1 || abs(y2-y1)>1 ;
+    enum BondLength { Moore, MooreR2, vonNeumann, vonNeumannR2 };
+    
+    const BondLength chosenBondLength = vonNeumannR2;
+    
+    switch( chosenBondLength )
+    {
+        case Moore:           return abs(x2-x1)>1 || abs(y2-y1)>1 ;
+        case MooreR2:         return abs(x2-x1)>2 || abs(y2-y1)>2 ;
+        case vonNeumann:      return abs(x2-x1) + abs(y2-y1) > 1 ;
+        case vonNeumannR2:    return abs(x2-x1) + abs(y2-y1) > 2 ;
+    }
 }
 
 bool inRect(int x,int y,int start_x,int start_y,int end_x,int end_y)
@@ -327,10 +354,10 @@ void World::moveBlock(int sx,int sy,int ex,int ey,int dx,int dy)
                 movers.push_back(a);
         }
     }
-    this->moveAtoms(movers,dx,dy);
+    this->moveTheseAtoms(movers,dx,dy);
 }
 
-void World::moveAtoms(const vector<Atom*>& movers,int dx,int dy)
+void World::moveTheseAtoms(const vector<Atom*>& movers,int dx,int dy)
 {
     // pull them from the grid, move them, put them back
     for(vector<Atom*>::const_iterator it=movers.begin();it!=movers.end();it++)
@@ -347,8 +374,48 @@ void World::moveAtoms(const vector<Atom*>& movers,int dx,int dy)
     }
 }
 
-/* not sure if we need this extra bit of physics
-void World::moveSomeAtoms()
+void World::moveSomeIndividualAtoms()
+{
+    // allow every atom one chance to move
+    for( vector<Atom>::iterator a = this->atoms.begin(); a != this->atoms.end(); ++a )
+    {
+        int iMove = rand()%4;
+        int dx = vonNeumann[iMove][0];
+        int dy = vonNeumann[iMove][1];
+        // can we make this move?
+        if( isOffGrid( a->x + dx, a->y + dy ) ) 
+        {
+            continue;
+        }
+        // would this atom land on another?
+        if( this->getAt( a->x + dx, a->y + dy ) )
+        {
+            continue; 
+        }
+        // would this move over-stretch any of this atom's bonds with non-movers?
+        bool stillOK = true;
+        for( vector<Atom*>::const_iterator it = a->bonds.begin(); it != a->bonds.end(); ++it )
+        {
+            Atom *b = *it;
+            if( bondTooLong( a->x + dx, a->y + dy, b->x, b->y ) ) 
+            {
+                stillOK = false;
+                break; 
+            }
+        }
+        if( !stillOK)
+        {
+            continue; 
+        }
+        
+        this->setAt( a->x, a->y, NULL );
+        a->x += dx;
+        a->y += dy;
+        this->setAt( a->x, a->y, &(*a) );
+    }
+}
+
+void World::moveSomeBondedAtoms()
 {
     vector<Atom*> movers;
     movers.push_back(&this->atoms[rand()%this->atoms.size()]);
@@ -371,7 +438,7 @@ void World::moveSomeAtoms()
         }
         if(atom_to_add)
             movers.push_back(atom_to_add);
-    } while(atom_to_add && rand()%2); // prefer moving fewer atoms
+    } while(atom_to_add);// && rand()%2); // prefer moving fewer atoms
     
     int iMove = rand()%4;
     int dx = vonNeumann[iMove][0];
@@ -400,6 +467,6 @@ void World::moveSomeAtoms()
         }
     }
     if(can_move)
-        moveAtoms(movers,dx,dy);
+        moveTheseAtoms(movers,dx,dy);
 }
-*/
+
