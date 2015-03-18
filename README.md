@@ -7,7 +7,7 @@ Compilation instructions:
 
 On Linux:
 
-* Install libwxgtk-2.8-dev and cmake (and probably some other things)
+* Install libwxgtk-3.0-dev (or newer) and cmake (and probably some other things)
 * cd build
 * ccmake ../src
 * c (configure)
@@ -18,7 +18,7 @@ Then just use make to rebuild after changes. (Read up on CMake if needed.)
 
 On Windows:
 
-* Install wxWidgets 2.8 and CMake
+* Install wxWidgets (latest) and CMake
 * Run CMake
 * Specify the build folder and the source folder (src)
 * Configure button. Choose your target environment (e.g. Visual Studio)
