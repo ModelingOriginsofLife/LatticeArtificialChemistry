@@ -1,5 +1,4 @@
 // wxWidgets:
-#include <wx/wx.h>
 #include <wx/dcbuffer.h>
 
 // local:
@@ -9,6 +8,7 @@
 // STL:
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 // workaround for cross-platform timing differences
@@ -108,8 +108,8 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame( _("lattice_shape"), wxDefaultPosition,
-                                  wxSize(800,600) );
+    MyFrame *frame = new MyFrame(_("lattice_artificial_chemistry"), wxDefaultPosition,
+        wxSize(800, 600));
     frame->Show(true);
     SetTopWindow(frame);
     return true;
@@ -289,9 +289,11 @@ void MyFrame::OnMouseMove(wxMouseEvent& event)
 
 void MyFrame::OnSize(wxSizeEvent& event)
 {
-    float scale_x = this->GetClientSize().GetWidth()/this->world.getSizeX();
-    float scale_y = this->GetClientSize().GetHeight()/this->world.getSizeY();
-    this->scale = min(scale_x,scale_y);
+    if (this->world.getSizeX() > 0 && this->world.getSizeY() > 0) {
+        float scale_x = this->GetClientSize().GetWidth() / this->world.getSizeX();
+        float scale_y = this->GetClientSize().GetHeight() / this->world.getSizeY();
+        this->scale = min(scale_x, scale_y);
 
-    this->Refresh(true);
+        this->Refresh(true);
+    }
 }

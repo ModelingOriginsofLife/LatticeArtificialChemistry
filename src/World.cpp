@@ -35,7 +35,7 @@ void World::init(int x,int y)
     string s = "eabbcdaf";
     for(int iCopy=0;iCopy<num_copies;iCopy++)
     {
-        for(int j=0;j<s.length();j++)
+        for(size_t j=0;j<s.length();j++)
         {
             initAtom(i,1+j,10+iCopy*10,s[j],(j==0)?8:1);
             if(j>0)
@@ -262,6 +262,7 @@ bool bondTooLong(int x1,int y1,int x2,int y2)
         case vonNeumann:      return abs(x2-x1) + abs(y2-y1) > 1 ;
         case vonNeumannR2:    return abs(x2-x1) + abs(y2-y1) > 2 ;
     }
+	throw runtime_error("Unsupported bond neighborhood.");
 }
 
 bool inRect(int x,int y,int start_x,int start_y,int end_x,int end_y)

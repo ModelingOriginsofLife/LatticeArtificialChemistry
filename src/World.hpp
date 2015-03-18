@@ -10,6 +10,8 @@ const int vonNeumann[4][2] = {{1,0},{0,1},{-1,0},{0,-1}};
 class World
 {
     public:
+
+		World() : X(0), Y(0) {}
     
         void init(int x,int y);
         
